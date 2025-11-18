@@ -1,0 +1,38 @@
+name: test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'releases/v*'
+    paths-ignore:
+      - '.github/workflows/ci-subaction.yml'
+      - 'subaction/**'
+  pull_request:
+    paths-ignore:
+      - '.github/workflows/ci-subaction.yml'
+      - 'subaction/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v5
+      -
+        name: Test
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          targets: test
+      -
+        name: Upload coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/clover.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
