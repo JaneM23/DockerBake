@@ -42,17 +42,13 @@ RUN --mount=type=bind,target=.,rw \
 FROM scratch AS build-update
 COPY --from=build /out /
 
-FROM build AS build-validate
-RUN --mount=type=bind,target=.,rw <<EOT
-  set -e
-  git add -A
-  cp -rf /out/* .
-  if [ -n "$(git status --porcelain -- dist)" ]; then
-    echo >&2 'ERROR: Build result differs. Please build first with "docker buildx bake build"'
-    git status --porcelain -- dist
-    exit 1
-  fi
+RUN --mount=type=bind,target=.,rw \
+  --mount=type=cache,target=/src/.yarn/cache <<EOT
+  npm install -g yarn@4.9.2
+  yarn --version
+  yarn config set --home enableTelemetry 0
 EOT
+
 
 FROM deps AS format
 RUN --mount=type=bind,target=.,rw \

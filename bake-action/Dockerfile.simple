@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+# Carpeta de trabajo dentro del contenedor
+WORKDIR /app
+
+# Copiamos package.json y package-lock.json (si existe)
+COPY package.json package-lock.json* ./
+
+# Instalamos dependencias con npm
+RUN npm install
+
+# Copiamos el resto del código fuente
+COPY . .
+
+# Construimos el proyecto (si existe el script "build")
+RUN npm run build || echo "No hay script build, se omite."
+
+# Comando por defecto (solo para probar la imagen)
+CMD ["node", "dist/index.js"]
+
+
