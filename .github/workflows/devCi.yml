@@ -4,10 +4,17 @@ on:
   push:
     branches:
       - main          # rama principal
+
   pull_request:
     branches:
       - main
-  workflow_dispatch: {}   # para correrlo a mano desde Actions
+
+  # Ejecutar automáticamente cada 5 horas (00:00, 05:00, 10:00, 15:00, 20:00, etc. en UTC)
+  schedule:
+    - cron: "0 */5 * * *"
+
+  # Para correrlo a mano desde Actions
+  workflow_dispatch: {}
 
 jobs:
   # 1) Job de tests (Node + Jest)
