@@ -3,16 +3,17 @@ name: DevOps CI - Tests + Docker Bake
 on:
   push:
     branches:
-      - main          # tu rama principal
+      - main
   pull_request:
     branches:
       - main
-  workflow_dispatch: {}   # para correrlo a mano desde Actions
+  workflow_dispatch:
 
 jobs:
-  # 1) Job de pruebas (los 15 tests)
+
   tests:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: ./bake-action
@@ -29,33 +30,28 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Ejecutar tests (no bloquea el pipeline si fallan)
+      - name: Ejecutar tests
         run: npm test
-        continue-on-error: true
-        # (opcional: puedes dejar también las vars, pero ya viste que no cambian el resultado)
-        env:
-          GITHUB_RUN_ID: "123456789"
-          GITHUB_RUN_ATTEMPT: "1"
 
-  # 2) Job de Docker Bake (se ejecuta aunque algunos tests fallen)
   docker-bake:
-    needs: tests          # espera a que acaben los tests, pero no se detiene por el fallo
+    needs: tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Configurar QEMU (multi-arquitectura)
+      - name: Configurar QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build con Docker Bake (sin push)
+      - name: Docker Bake (sin push)
         uses: docker/bake-action@v5
         with:
           files: ./bake-action/test/config.hcl
           targets: default
+          workdir: ./bake-action
+          set: "*.context=."
           push: false
-          provenance: false
