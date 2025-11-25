@@ -5,7 +5,7 @@ on:
     branches:
       - main          # rama principal
 
-  pull_request:
+  pull_request:  
     branches:
       - main
 
