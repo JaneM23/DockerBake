@@ -3,18 +3,16 @@ name: DevOps CI - Tests + Docker Bake
 on:
   push:
     branches:
-      - main          # tu rama principal
+      - main       
   pull_request:
     branches:
       - main
   workflow_dispatch: {}   # para correrlo a mano desde Actions
 
 jobs:
+  # job de pruebas (los 15 tests)
   tests:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_RUN_ID: 123456789
-      GITHUB_RUN_ATTEMPT: 1
     defaults:
       run:
         working-directory: ./bake-action
@@ -33,9 +31,11 @@ jobs:
 
       - name: Ejecutar tests
         run: npm test
+        env:
+          GITHUB_RUN_ID: "123456789"   #esto fue la correccion
+          GITHUB_RUN_ATTEMPT: "1"      #correccion
 
-
-  # 2) Job de Docker Bake (solo si pasan los tests)
+  # jobs soo si pasan los test 
   docker-bake:
     needs: tests          # no corre si falla el job tests
     runs-on: ubuntu-latest
@@ -50,17 +50,11 @@ jobs:
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Si SOLO quieres construir y no subir a Docker Hub,
-      # dejamos login y push desactivados.
-      # Si luego quieres push, aquí agregamos login y secrets.
-
       - name: Build con Docker Bake (sin push)
         uses: docker/bake-action@v5
         with:
-          # Usa el archivo de pruebas del repo original
+          # usa el archivo de configuración de pruebas
           files: ./bake-action/test/config.hcl
-          # puedes cambiar el target si lo necesitas
           targets: default
           push: false          # no sube a ningún registry, solo construye
           provenance: false
-
