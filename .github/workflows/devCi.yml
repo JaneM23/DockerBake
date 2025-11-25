@@ -10,10 +10,11 @@ on:
   workflow_dispatch: {}   # para correrlo a mano desde Actions
 
 jobs:
-  # 1) Job de pruebas (tus 15 tests)
   tests:
     runs-on: ubuntu-latest
-    # ejecuta los comandos dentro de la carpeta bake-action
+    env:
+      GITHUB_RUN_ID: 123456789
+      GITHUB_RUN_ATTEMPT: 1
     defaults:
       run:
         working-directory: ./bake-action
@@ -32,6 +33,7 @@ jobs:
 
       - name: Ejecutar tests
         run: npm test
+
 
   # 2) Job de Docker Bake (solo si pasan los tests)
   docker-bake:
