@@ -1,6 +1,6 @@
 name: DevOps CI - Tests + Docker Bake
 
-on:
+on: 
   push:
     branches:
       - main          # rama principal
